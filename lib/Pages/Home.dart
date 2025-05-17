@@ -28,17 +28,25 @@ class Home extends StatelessWidget {
               onPressed: () {
                 // if routes are set use this bellow command to navigate between pages
                 context.go('/High');
-                print("high");
               },
               child: Text('High'),
+              style: ElevatedButton.styleFrom(
+                side: BorderSide(color: Colors.black, width: 2),
+                textStyle: const TextStyle(fontSize: 20),
+                minimumSize: const Size(150, 60),
+              ),
             ),
-            const Text("or"),
+            const Text("or", style: TextStyle(fontSize: 20)),
             ElevatedButton(
               onPressed: () {
                 context.go('/Nawt');
-                print("Nawt");
               },
               child: Text('Nawt'),
+              style: ElevatedButton.styleFrom(
+                side: BorderSide(color: Colors.black, width: 2),
+                textStyle: const TextStyle(fontSize: 20),
+                minimumSize: const Size(150, 60),
+              ),
             ),
             const SizedBox(height: 20),
             const Text('Developed by me ^ ^', style: TextStyle(fontSize: 16)),

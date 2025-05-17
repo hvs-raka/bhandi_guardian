@@ -7,6 +7,7 @@ import 'pages/Home.dart';
 // Define the router configuration
 final _router = GoRouter(
   initialLocation: '/',
+  // setting up paths for route
   routes: [
     GoRoute(path: '/', builder: (context, state) => const Home()),
     GoRoute(path: '/High', builder: (context, state) => const High()),
@@ -31,7 +32,8 @@ class MyApp extends StatelessWidget {
           'Bhandi Guardian', // title it usually appears in task switches on mobile devices
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: Colors.teal,
+          brightness: Brightness.dark,
         ), // setting up theme, here theme seed is use to make harmonious palate from color given
         useMaterial3: true,
       ),
