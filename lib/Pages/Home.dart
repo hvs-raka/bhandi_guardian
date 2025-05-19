@@ -29,7 +29,7 @@ class Home extends StatelessWidget {
                 // if routes are set use this bellow command to navigate between pages
                 context.go('/High');
               },
-              child: Text('High'),
+              child: Text('yeah, High'),
               style: ElevatedButton.styleFrom(
                 side: BorderSide(color: Colors.black, width: 2),
                 textStyle: const TextStyle(fontSize: 20),
@@ -41,7 +41,7 @@ class Home extends StatelessWidget {
               onPressed: () {
                 context.go('/Nawt');
               },
-              child: Text('Nawt'),
+              child: Text("nahh, I'm Nawt"),
               style: ElevatedButton.styleFrom(
                 side: BorderSide(color: Colors.black, width: 2),
                 textStyle: const TextStyle(fontSize: 20),

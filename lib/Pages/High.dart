@@ -17,8 +17,39 @@ class High extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: const Center(
-        child: Text("so you're high my friend", style: TextStyle(fontSize: 20)),
+      body: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                // Trigger SOS action
+                print("SOS Pressed");
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Red for urgency
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 50,
+                  vertical: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 8,
+                shadowColor: Colors.redAccent,
+              ),
+              child: const Text(
+                'SOS',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

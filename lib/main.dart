@@ -1,5 +1,6 @@
 import 'package:bhandi_guardian/Pages/High.dart';
 import 'package:bhandi_guardian/Pages/Nawt.dart';
+//import 'package:bhandi_guardian/Pages/otherScreens/GuardianSetup.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/Home.dart';
@@ -12,6 +13,10 @@ final _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const Home()),
     GoRoute(path: '/High', builder: (context, state) => const High()),
     GoRoute(path: '/Nawt', builder: (context, state) => const Nawt()),
+    /*GoRoute(
+      path: '/otherScreens/GuardianSetup',
+      builder: (context, state) => const GuardianSetup(),
+    ),*/
   ],
 );
 
