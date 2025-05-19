@@ -222,20 +222,105 @@ class SafeLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Setup Safe Location'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const Nawt()),
-            );
-          },
+      appBar: AppBar(title: const Text("Location Form")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: const [
+            CoordinateCard(),
+            SizedBox(height: 20),
+            const Text("or", style: TextStyle(fontSize: 20)),
+            CurrentLocationCard(),
+          ],
         ),
-        centerTitle: true,
       ),
-      body: Padding(padding: const EdgeInsets.all(16)),
+    );
+  }
+}
+
+class CoordinateCard extends StatefulWidget {
+  const CoordinateCard({super.key});
+
+  @override
+  State<CoordinateCard> createState() => _CoordinateCardState();
+}
+
+class _CoordinateCardState extends State<CoordinateCard> {
+  final TextEditingController latController = TextEditingController();
+  final TextEditingController longController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text(
+              "Enter Coordinates",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: latController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Latitude",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: longController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Longitude",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CurrentLocationCard extends StatelessWidget {
+  const CurrentLocationCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text(
+              "Mark Your Current Location",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Add location logic
+              },
+              icon: const Icon(Icons.location_on),
+              label: const Text("Mark My Current Location"),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 20,
+                ),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
