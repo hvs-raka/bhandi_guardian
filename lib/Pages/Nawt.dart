@@ -52,7 +52,10 @@ class Nawt extends StatelessWidget {
               //icon: Icons.info,
               label: "Setup ToDo List",
               onTap: () {
-                // Navigate or do something
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TodoPage()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -61,7 +64,10 @@ class Nawt extends StatelessWidget {
               //icon: Icons.info,
               label: "Setup visit location",
               onTap: () {
-                // Navigate or do something
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ToVisit()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -70,7 +76,10 @@ class Nawt extends StatelessWidget {
               //icon: Icons.info,
               label: "Set Playlist",
               onTap: () {
-                // Navigate or do something
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SetPlaylist()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -158,11 +167,12 @@ class DetailCard extends StatefulWidget {
   const DetailCard({super.key});
 
   @override
-  State<DetailCard> createState() => _DetailCardState();
+  State<DetailCard> createState() => _DetailCardState(); // pointing towards class which handles logic and ui
 }
 
 class _DetailCardState extends State<DetailCard> {
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController nameController =
+      TextEditingController(); // text fields
   final TextEditingController numberController = TextEditingController();
   bool isEnabled = false;
 
@@ -316,6 +326,229 @@ class CurrentLocationCard extends StatelessWidget {
                   horizontal: 20,
                 ),
                 textStyle: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ToDo list setup
+
+class TodoPage extends StatefulWidget {
+  const TodoPage({super.key});
+
+  @override
+  State<TodoPage> createState() => _TodoPageState();
+}
+
+// final keyword is used to those elements which won't be changed afterwards
+// so difference between final and const is that const is compile-time constant where as final is run-time constant
+
+class _TodoPageState extends State<TodoPage> {
+  final List<String> todos = []; // list of todo items
+  final TextEditingController todoController = TextEditingController();
+
+  void addTodo() {
+    final text = todoController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        todos.add(text);
+      });
+      todoController.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Todo List")),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: todoController,
+              decoration: const InputDecoration(
+                labelText: 'Enter todo',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(onPressed: addTodo, child: const Text("Add Todo")),
+            const SizedBox(height: 20),
+            Expanded(
+              child:
+                  todos.isEmpty
+                      ? const Center(child: Text("No todos yet"))
+                      : ListView.builder(
+                        itemCount: todos.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(
+                              title: Text(todos[index]),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close),
+                                color: Colors.red,
+                                onPressed: () {
+                                  setState(() {
+                                    todos.removeAt(index);
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// setup visit location
+
+class ToVisit extends StatelessWidget {
+  const ToVisit({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Location Form")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: const [
+            const Text("Enter 1st Location"),
+            CoordinateCardToVisit(),
+            SizedBox(height: 20),
+            const Text("Enter 2nd Location"),
+            CoordinateCardToVisit(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CoordinateCardToVisit extends StatefulWidget {
+  const CoordinateCardToVisit({super.key});
+
+  @override
+  State<CoordinateCardToVisit> createState() => _CoordinateCardStateToVisit();
+}
+
+class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
+  final TextEditingController latController = TextEditingController();
+  final TextEditingController longController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text(
+              "Enter Coordinates",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: latController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Latitude",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: longController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Longitude",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Playlist setup
+
+class SetPlaylist extends StatelessWidget {
+  const SetPlaylist({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Location Form")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: const [
+            const Text("Enter 1st Playlist"),
+            PlaylistCard(),
+            SizedBox(height: 20),
+            const Text("Enter 2nd Playlist"),
+            PlaylistCard(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PlaylistCard extends StatefulWidget {
+  const PlaylistCard({super.key});
+
+  @override
+  State<PlaylistCard> createState() => _PlaylistCard();
+}
+
+class _PlaylistCard extends State<PlaylistCard> {
+  final TextEditingController latController = TextEditingController();
+  final TextEditingController longController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text(
+              "Playlist",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: latController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: longController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Link",
+                border: OutlineInputBorder(),
               ),
             ),
           ],
