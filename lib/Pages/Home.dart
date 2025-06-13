@@ -1,6 +1,9 @@
 // File: lib/pages/home.dart
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // importing material design packages
+//import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -49,7 +52,28 @@ class Home extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Developed by me ^ ^', style: TextStyle(fontSize: 16)),
+            RichText(
+              text: TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(
+                    text: 'Developed by ',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  TextSpan(
+                    text: 'me ^-^',
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap =
+                              () => launchUrlString(
+                                'https://hvs-raka.github.io/Raka/',
+                              ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
