@@ -1,5 +1,8 @@
+import 'package:bhandi_guardian/boxes/boxes.dart';
+import 'package:bhandi_guardian/db_model/Todo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 
 // main widget for nawt page
 
@@ -348,18 +351,20 @@ class TodoPage extends StatefulWidget {
 // so difference between final and const is that const is compile-time constant where as final is run-time constant
 
 class _TodoPageState extends State<TodoPage> {
-  final List<String> todos = []; // list of todo items
-  final TextEditingController todoController = TextEditingController();
-
-  void addTodo() {
-    final text = todoController.text.trim();
+  //final List<String> todos = []; // list of todo items
+  final todoController = TextEditingController();
+  final todoBox = Hive.box<Todo_Model>('todos');
+  /*void addTodo() {
+    final text = Todo_Model(
+      Todo: todoController.text,
+    ); //todoController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
         todos.add(text);
       });
       todoController.clear();
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -377,24 +382,38 @@ class _TodoPageState extends State<TodoPage> {
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(onPressed: addTodo, child: const Text("Add Todo")),
+            ElevatedButton(
+              onPressed: () {
+                final text = Todo_Model(Todo: todoController.text);
+                final box = Boxes.getData();
+                box.add(text);
+                text.save();
+                todoController.clear();
+              },
+              child: const Text("Add Todo"),
+            ),
             const SizedBox(height: 20),
+
             Expanded(
               child:
-                  todos.isEmpty
+                  todoBox.isEmpty
                       ? const Center(child: Text("No todos yet"))
                       : ListView.builder(
-                        itemCount: todos.length,
+                        itemCount: todoBox.length,
                         itemBuilder: (context, index) {
+                          final todo = todoBox.getAt(index);
+                          if (todo == null) return const SizedBox();
                           return Card(
                             child: ListTile(
-                              title: Text(todos[index]),
+                              title: Text(todo.Todo),
                               trailing: IconButton(
                                 icon: const Icon(Icons.close),
                                 color: Colors.red,
                                 onPressed: () {
                                   setState(() {
-                                    todos.removeAt(index);
+                                    todoBox.deleteAt(
+                                      index,
+                                    ); //todos.removeAt(index);
                                   });
                                 },
                               ),

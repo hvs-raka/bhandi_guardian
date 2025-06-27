@@ -1,11 +1,15 @@
+import 'package:bhandi_guardian/db_model/Todo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 
 class High extends StatelessWidget {
   const High({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final todoBox = Hive.box<Todo_Model>('todos');
+    final todos = todoBox.values.map((e) => e.Todo).toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('High Mode'),
@@ -41,7 +45,7 @@ class High extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            TodoBox(todos: ['Buy milk', 'Walk dog', 'Call mom', 'Do homework']),
+            TodoBox(todos: todos),
             buildTileButton(
               context,
               //icon: Icons.info,

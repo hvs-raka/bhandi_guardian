@@ -1,7 +1,8 @@
-import 'dart:io';
+//import 'dart:io';
 
 import 'package:bhandi_guardian/Pages/High.dart';
 import 'package:bhandi_guardian/Pages/Nawt.dart';
+import 'package:bhandi_guardian/db_model/Todo_model.dart';
 //import 'package:bhandi_guardian/Pages/otherScreens/GuardianSetup.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +30,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // initializing hive here we're not assigning path manually it handles it internally
   await Hive.initFlutter();
+  Hive.registerAdapter(TodoModelAdapter());
 
+  await Hive.openBox<Todo_Model>('Todos');
   runApp(const MyApp());
 }
 
