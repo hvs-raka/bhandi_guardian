@@ -39,3 +39,43 @@ class TodoModelAdapter extends TypeAdapter<Todo_Model> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class VisitListAdapter extends TypeAdapter<Visit_List> {
+  @override
+  final int typeId = 1;
+
+  @override
+  Visit_List read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Visit_List(
+      latitude: fields[0] as double,
+      longitude: fields[1] as double,
+      placeName: fields[2] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Visit_List obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.latitude)
+      ..writeByte(1)
+      ..write(obj.longitude)
+      ..writeByte(2)
+      ..write(obj.placeName);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VisitListAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

@@ -31,8 +31,12 @@ void main() async {
   // initializing hive here we're not assigning path manually it handles it internally
   await Hive.initFlutter();
   Hive.registerAdapter(TodoModelAdapter());
+  Hive.registerAdapter(VisitListAdapter());
 
   await Hive.openBox<Todo_Model>('Todos');
+  await Hive.openBox<Visit_List>(
+    'Visit_List',
+  ); // here 'Todos' and 'Visit_List' could be anything but should be consistent
   runApp(const MyApp());
 }
 

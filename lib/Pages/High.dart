@@ -9,7 +9,13 @@ class High extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final todoBox = Hive.box<Todo_Model>('todos');
-    final todos = todoBox.values.map((e) => e.Todo).toList();
+    final todos =
+        todoBox.values
+            .toList()
+            .asMap()
+            .entries
+            .map((entry) => '${entry.key + 1}. ${entry.value.Todo}')
+            .toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('High Mode'),

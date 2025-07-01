@@ -1,8 +1,12 @@
+import 'dart:async';
+
+import 'package:bhandi_guardian/utils/debouncer.dart';
 import 'package:bhandi_guardian/boxes/boxes.dart';
 import 'package:bhandi_guardian/db_model/Todo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 // main widget for nawt page
 
@@ -395,32 +399,39 @@ class _TodoPageState extends State<TodoPage> {
             const SizedBox(height: 20),
 
             Expanded(
-              child:
-                  todoBox.isEmpty
-                      ? const Center(child: Text("No todos yet"))
-                      : ListView.builder(
-                        itemCount: todoBox.length,
-                        itemBuilder: (context, index) {
-                          final todo = todoBox.getAt(index);
-                          if (todo == null) return const SizedBox();
-                          return Card(
-                            child: ListTile(
-                              title: Text(todo.Todo),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.close),
-                                color: Colors.red,
-                                onPressed: () {
-                                  setState(() {
-                                    todoBox.deleteAt(
-                                      index,
-                                    ); //todos.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+              child: ValueListenableBuilder(
+                valueListenable: todoBox.listenable(),
+                builder: (context, Box<Todo_Model> box, _) {
+                  if (box.isEmpty) {
+                    return const Center(child: Text("No todos yet"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: box.length,
+                    itemBuilder: (context, index) {
+                      final todo = box.getAt(index);
+                      if (todo == null) return const SizedBox();
+
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            todo.Todo,
+                          ), // assuming 'Todo' is a field in Todo_Model
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close),
+                            color: Colors.red,
+                            onPressed: () {
+                              box.deleteAt(
+                                index,
+                              ); // no need to call setState, listenable handles it
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -428,6 +439,9 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 }
+
+// setting up debounce (so that on change don't store very key stroke instead only store when user is stopped writing)
+// in util now
 
 // setup visit location
 
@@ -464,6 +478,7 @@ class CoordinateCardToVisit extends StatefulWidget {
 class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
   final TextEditingController latController = TextEditingController();
   final TextEditingController longController = TextEditingController();
+  final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
 
   @override
   Widget build(BuildContext context) {
@@ -486,6 +501,11 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
                 labelText: "Latitude",
                 border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                debouncer.run(() {
+                  final box = Hive.box<Visit_List>('latitude');
+                });
+              },
             ),
             const SizedBox(height: 12),
             TextField(
@@ -493,6 +513,15 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: "Longitude",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: longController,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                labelText: "PlaceName",
                 border: OutlineInputBorder(),
               ),
             ),
