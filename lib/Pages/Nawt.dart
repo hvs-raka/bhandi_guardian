@@ -478,7 +478,44 @@ class CoordinateCardToVisit extends StatefulWidget {
 class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
   final TextEditingController latController = TextEditingController();
   final TextEditingController longController = TextEditingController();
+  final TextEditingController placeController = TextEditingController();
   final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
+  late Box<Visit_List> visitBox;
+
+  @override
+  void initState() {
+    super.initState();
+    visitBox = Hive.box<Visit_List>('Visit_List');
+
+    if (visitBox.isNotEmpty) {
+      final visit = visitBox.getAt(0);
+      latController.text = visit?.latitude.toString() ?? '';
+      longController.text = visit?.longitude.toString() ?? '';
+      placeController.text = visit?.placeName ?? '';
+    }
+  }
+
+  void _saveVisitData() {
+    final lat = double.tryParse(latController.text.trim()) ?? 0;
+    final long = double.tryParse(longController.text.trim()) ?? 0;
+    final place = placeController.text.trim();
+
+    if (place.isEmpty || lat == 0 || long == 0) return;
+
+    if (visitBox.isEmpty) {
+      visitBox.add(
+        Visit_List(latitude: lat, longitude: long, placeName: place),
+      );
+    } else {
+      final visit = visitBox.getAt(0);
+      if (visit != null) {
+        visit.latitude = lat;
+        visit.longitude = long;
+        visit.placeName = place;
+        visit.save();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -501,11 +538,8 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
                 labelText: "Latitude",
                 border: OutlineInputBorder(),
               ),
-              onChanged: (value) {
-                debouncer.run(() {
-                  final box = Hive.box<Visit_List>('latitude');
-                });
-              },
+              onTap: () => latController.clear(),
+              onChanged: (_) => debouncer.run(_saveVisitData),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -515,15 +549,19 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
                 labelText: "Longitude",
                 border: OutlineInputBorder(),
               ),
+              onTap: () => longController.clear(),
+              onChanged: (_) => debouncer.run(_saveVisitData),
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: longController,
+              controller: placeController,
               keyboardType: TextInputType.text,
               decoration: const InputDecoration(
                 labelText: "PlaceName",
                 border: OutlineInputBorder(),
               ),
+              onTap: () => placeController.clear(),
+              onChanged: (_) => debouncer.run(_saveVisitData),
             ),
           ],
         ),
