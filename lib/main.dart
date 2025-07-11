@@ -32,11 +32,15 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TodoModelAdapter());
   Hive.registerAdapter(VisitListAdapter());
+  Hive.registerAdapter(PlayListAdapter());
+  Hive.registerAdapter(GuardianListAdapter());
 
   await Hive.openBox<Todo_Model>('Todos');
   await Hive.openBox<Visit_List>(
     'Visit_List',
   ); // here 'Todos' and 'Visit_List' could be anything but should be consistent
+  await Hive.openBox<PlayList>('PlayList');
+  await Hive.openBox<GuardianList>('GuardianList');
   runApp(const MyApp());
 }
 

@@ -182,6 +182,43 @@ class _DetailCardState extends State<DetailCard> {
       TextEditingController(); // text fields
   final TextEditingController numberController = TextEditingController();
   bool isEnabled = false;
+  final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
+  late Box<GuardianList> guardianlistBox;
+
+  /*
+  @override
+  void initState() {
+    super.initState();
+    guardianlistBox = Hive.box<GuardianList>('GuardianList');
+
+    final guardianlist = guardianlistBox.isNotEmpty ? guardianlistBox.getAt(0) : null;
+
+    if (guardianlist != null) {
+      nameController.text = guardianlist.guardianName;
+      numberController.text = guardianlist?.guardianNumber.toString() ?? '';
+      // set for button too
+    }
+  }
+
+  // set for button too
+  void _saveGuardianListData() {
+    final name = nameController.text.trim();
+    final number = int.tryParse(numberController.text.trim()) ?? 0;
+
+    if (name.isEmpty || number.isEmpty) return;
+
+    if (guardianlistBox.isEmpty) {
+      guardianlistBox.add(PlayList(guardianName: name, guardianNumber: link));
+    } else {
+      final guardianlist = guardianlistBox.getAt(0);
+      if (guardianlist != null) {
+        guardianlist.guardianName = name;
+        guardianlist.guardianLink = number;
+        guardianlist.save();
+      }
+    }
+  }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -603,8 +640,41 @@ class PlaylistCard extends StatefulWidget {
 }
 
 class _PlaylistCard extends State<PlaylistCard> {
-  final TextEditingController latController = TextEditingController();
-  final TextEditingController longController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController linkController = TextEditingController();
+  final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
+  late Box<PlayList> playlistBox;
+
+  @override
+  void initState() {
+    super.initState();
+    playlistBox = Hive.box<PlayList>('PlayList');
+
+    final playlist = playlistBox.isNotEmpty ? playlistBox.getAt(0) : null;
+
+    if (playlist != null) {
+      nameController.text = playlist.playlistName;
+      linkController.text = playlist.playlistLink;
+    }
+  }
+
+  void _savePlayListData() {
+    final name = nameController.text.trim();
+    final link = linkController.text.trim();
+
+    if (name.isEmpty || link.isEmpty) return;
+
+    if (playlistBox.isEmpty) {
+      playlistBox.add(PlayList(playlistName: name, playlistLink: link));
+    } else {
+      final playlist = playlistBox.getAt(0);
+      if (playlist != null) {
+        playlist.playlistName = name;
+        playlist.playlistLink = link;
+        playlist.save();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -621,21 +691,25 @@ class _PlaylistCard extends State<PlaylistCard> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: latController,
-              keyboardType: TextInputType.number,
+              controller: nameController,
+              keyboardType: TextInputType.text,
               decoration: const InputDecoration(
                 labelText: "Name",
                 border: OutlineInputBorder(),
               ),
+              onTap: () => nameController.clear(),
+              onChanged: (_) => debouncer.run(_savePlayListData),
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: longController,
-              keyboardType: TextInputType.number,
+              controller: linkController,
+              keyboardType: TextInputType.text,
               decoration: const InputDecoration(
                 labelText: "Link",
                 border: OutlineInputBorder(),
               ),
+              onTap: () => linkController.clear(),
+              onChanged: (_) => debouncer.run(_savePlayListData),
             ),
           ],
         ),
