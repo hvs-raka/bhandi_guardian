@@ -1,4 +1,4 @@
-import 'dart:async';
+//import 'dart:async';
 
 import 'package:bhandi_guardian/utils/debouncer.dart';
 import 'package:bhandi_guardian/boxes/boxes.dart';
@@ -73,7 +73,9 @@ class Nawt extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ToVisit()),
+                  MaterialPageRoute(
+                    builder: (_) => const ToVisit(visitIndex: 0),
+                  ),
                 );
               },
             ),
@@ -483,7 +485,8 @@ class _TodoPageState extends State<TodoPage> {
 // setup visit location
 
 class ToVisit extends StatelessWidget {
-  const ToVisit({super.key});
+  final int visitIndex;
+  const ToVisit({super.key, required this.visitIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -494,10 +497,10 @@ class ToVisit extends StatelessWidget {
         child: Column(
           children: const [
             const Text("Enter 1st Location"),
-            CoordinateCardToVisit(),
+            CoordinateCardToVisit(visitIndex: 0),
             SizedBox(height: 20),
             const Text("Enter 2nd Location"),
-            CoordinateCardToVisit(),
+            CoordinateCardToVisit(visitIndex: 1),
           ],
         ),
       ),
@@ -506,7 +509,7 @@ class ToVisit extends StatelessWidget {
 }
 
 class CoordinateCardToVisit extends StatefulWidget {
-  const CoordinateCardToVisit({super.key});
+  const CoordinateCardToVisit({super.key, required int visitIndex});
 
   @override
   State<CoordinateCardToVisit> createState() => _CoordinateCardStateToVisit();
@@ -518,13 +521,14 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
   final TextEditingController placeController = TextEditingController();
   final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
   late Box<Visit_List> visitBox;
+  int currentVisitIndex = 0;
 
   @override
   void initState() {
     super.initState();
     visitBox = Hive.box<Visit_List>('Visit_List');
 
-    if (visitBox.isNotEmpty) {
+    if (visitBox.length > currentVisitIndex) {
       final visit = visitBox.getAt(0);
       latController.text = visit?.latitude.toString() ?? '';
       longController.text = visit?.longitude.toString() ?? '';
@@ -539,18 +543,12 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
 
     if (place.isEmpty || lat == 0 || long == 0) return;
 
-    if (visitBox.isEmpty) {
-      visitBox.add(
-        Visit_List(latitude: lat, longitude: long, placeName: place),
-      );
+    final visit = Visit_List(latitude: lat, longitude: long, placeName: place);
+
+    if (visitBox.length > currentVisitIndex) {
+      visitBox.putAt(currentVisitIndex, visit); // update specific entry
     } else {
-      final visit = visitBox.getAt(0);
-      if (visit != null) {
-        visit.latitude = lat;
-        visit.longitude = long;
-        visit.placeName = place;
-        visit.save();
-      }
+      visitBox.add(visit); // add new
     }
   }
 
@@ -605,6 +603,14 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    latController.dispose();
+    longController.dispose();
+    placeController.dispose();
+    super.dispose();
+  }
 }
 
 // Playlist setup
@@ -621,10 +627,10 @@ class SetPlaylist extends StatelessWidget {
         child: Column(
           children: const [
             const Text("Enter 1st Playlist"),
-            PlaylistCard(),
+            PlaylistCard(index: 0),
             SizedBox(height: 20),
             const Text("Enter 2nd Playlist"),
-            PlaylistCard(),
+            PlaylistCard(index: 1),
           ],
         ),
       ),
@@ -633,7 +639,8 @@ class SetPlaylist extends StatelessWidget {
 }
 
 class PlaylistCard extends StatefulWidget {
-  const PlaylistCard({super.key});
+  final int index;
+  const PlaylistCard({super.key, required this.index});
 
   @override
   State<PlaylistCard> createState() => _PlaylistCard();
@@ -650,7 +657,11 @@ class _PlaylistCard extends State<PlaylistCard> {
     super.initState();
     playlistBox = Hive.box<PlayList>('PlayList');
 
-    final playlist = playlistBox.isNotEmpty ? playlistBox.getAt(0) : null;
+    // Use the passed index to fetch correct playlist
+    final playlist =
+        playlistBox.length > widget.index
+            ? playlistBox.getAt(widget.index)
+            : null;
 
     if (playlist != null) {
       nameController.text = playlist.playlistName;
@@ -664,14 +675,25 @@ class _PlaylistCard extends State<PlaylistCard> {
 
     if (name.isEmpty || link.isEmpty) return;
 
-    if (playlistBox.isEmpty) {
-      playlistBox.add(PlayList(playlistName: name, playlistLink: link));
-    } else {
-      final playlist = playlistBox.getAt(0);
+    if (playlistBox.length > widget.index) {
+      // Update existing playlist at index
+      final playlist = playlistBox.getAt(widget.index);
       if (playlist != null) {
         playlist.playlistName = name;
         playlist.playlistLink = link;
         playlist.save();
+      }
+    } else {
+      // Add new playlist at the end until desired index - if needed pad first
+      // but usually you'll be adding sequentially, so we check:
+      if (widget.index == playlistBox.length) {
+        playlistBox.add(PlayList(playlistName: name, playlistLink: link));
+      } else {
+        // If somehow the indexes are not sequential, you can override:
+        playlistBox.putAt(
+          widget.index,
+          PlayList(playlistName: name, playlistLink: link),
+        );
       }
     }
   }
