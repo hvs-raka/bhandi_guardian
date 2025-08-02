@@ -73,9 +73,7 @@ class Nawt extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const ToVisit(visitIndex: 0),
-                  ),
+                  MaterialPageRoute(builder: (_) => const ToVisit()),
                 );
               },
             ),
@@ -160,11 +158,11 @@ class GuardianSetup extends StatelessWidget {
             const Text(
               "Add your IRL guardians here, to call them on emergency.",
             ),
-            DetailCard(),
+            DetailCard(guardianIndex: 0),
             SizedBox(height: 18),
-            DetailCard(),
+            DetailCard(guardianIndex: 1),
             SizedBox(height: 18),
-            DetailCard(),
+            DetailCard(guardianIndex: 2),
           ],
         ),
       ),
@@ -173,7 +171,8 @@ class GuardianSetup extends StatelessWidget {
 }
 
 class DetailCard extends StatefulWidget {
-  const DetailCard({super.key});
+  final int guardianIndex;
+  const DetailCard({super.key, required this.guardianIndex});
 
   @override
   State<DetailCard> createState() => _DetailCardState(); // pointing towards class which handles logic and ui
@@ -187,40 +186,39 @@ class _DetailCardState extends State<DetailCard> {
   final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
   late Box<GuardianList> guardianlistBox;
 
-  /*
   @override
   void initState() {
     super.initState();
     guardianlistBox = Hive.box<GuardianList>('GuardianList');
-
-    final guardianlist = guardianlistBox.isNotEmpty ? guardianlistBox.getAt(0) : null;
-
+    final guardianlist =
+        guardianlistBox.length > widget.guardianIndex
+            ? guardianlistBox.getAt(widget.guardianIndex)
+            : null;
     if (guardianlist != null) {
       nameController.text = guardianlist.guardianName;
-      numberController.text = guardianlist?.guardianNumber.toString() ?? '';
-      // set for button too
+      numberController.text = guardianlist.guardianNumber.toString();
+      isEnabled = guardianlist.button;
     }
   }
 
-  // set for button too
-  void _saveGuardianListData() {
+  void _saveGuardianData() {
     final name = nameController.text.trim();
     final number = int.tryParse(numberController.text.trim()) ?? 0;
 
-    if (name.isEmpty || number.isEmpty) return;
+    if (name.isEmpty || number == 0) return;
 
-    if (guardianlistBox.isEmpty) {
-      guardianlistBox.add(PlayList(guardianName: name, guardianNumber: link));
+    final guardian = GuardianList(
+      guardianName: name,
+      guardianNumber: number,
+      button: isEnabled,
+    );
+
+    if (guardianlistBox.length > widget.guardianIndex) {
+      guardianlistBox.putAt(widget.guardianIndex, guardian);
     } else {
-      final guardianlist = guardianlistBox.getAt(0);
-      if (guardianlist != null) {
-        guardianlist.guardianName = name;
-        guardianlist.guardianLink = number;
-        guardianlist.save();
-      }
+      guardianlistBox.add(guardian);
     }
   }
-  */
 
   @override
   Widget build(BuildContext context) {
@@ -260,6 +258,7 @@ class _DetailCardState extends State<DetailCard> {
                   setState(() {
                     isEnabled = value;
                   });
+                  _saveGuardianData();
                 },
               ),
             ),
@@ -485,8 +484,7 @@ class _TodoPageState extends State<TodoPage> {
 // setup visit location
 
 class ToVisit extends StatelessWidget {
-  final int visitIndex;
-  const ToVisit({super.key, required this.visitIndex});
+  const ToVisit({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -509,7 +507,8 @@ class ToVisit extends StatelessWidget {
 }
 
 class CoordinateCardToVisit extends StatefulWidget {
-  const CoordinateCardToVisit({super.key, required int visitIndex});
+  final int visitIndex;
+  const CoordinateCardToVisit({super.key, required this.visitIndex});
 
   @override
   State<CoordinateCardToVisit> createState() => _CoordinateCardStateToVisit();
@@ -521,18 +520,21 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
   final TextEditingController placeController = TextEditingController();
   final debouncer = Debouncer(delay: const Duration(milliseconds: 800));
   late Box<Visit_List> visitBox;
-  int currentVisitIndex = 0;
 
   @override
   void initState() {
     super.initState();
     visitBox = Hive.box<Visit_List>('Visit_List');
 
-    if (visitBox.length > currentVisitIndex) {
-      final visit = visitBox.getAt(0);
-      latController.text = visit?.latitude.toString() ?? '';
-      longController.text = visit?.longitude.toString() ?? '';
-      placeController.text = visit?.placeName ?? '';
+    final visitLocation =
+        visitBox.length > widget.visitIndex
+            ? visitBox.getAt(widget.visitIndex)
+            : null;
+
+    if (visitLocation != null) {
+      latController.text = visitLocation.latitude.toString();
+      longController.text = visitLocation.longitude.toString();
+      placeController.text = visitLocation.placeName;
     }
   }
 
@@ -545,10 +547,19 @@ class _CoordinateCardStateToVisit extends State<CoordinateCardToVisit> {
 
     final visit = Visit_List(latitude: lat, longitude: long, placeName: place);
 
-    if (visitBox.length > currentVisitIndex) {
-      visitBox.putAt(currentVisitIndex, visit); // update specific entry
+    if (visitBox.length > widget.visitIndex) {
+      visitBox.putAt(
+        widget.visitIndex,
+        visit,
+      ); // update existing record at correct index
     } else {
-      visitBox.add(visit); // add new
+      // Add new record only if index matches length (i.e., sequential additions)
+      if (widget.visitIndex == visitBox.length) {
+        visitBox.add(visit);
+      } else {
+        // If indexes are non-sequential, might want to handle differently or throw error
+        visitBox.putAt(widget.visitIndex, visit);
+      }
     }
   }
 
