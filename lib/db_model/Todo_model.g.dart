@@ -156,3 +156,40 @@ class GuardianListAdapter extends TypeAdapter<GuardianList> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class HomeLocationAdapter extends TypeAdapter<HomeLocation> {
+  @override
+  final int typeId = 4;
+
+  @override
+  HomeLocation read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return HomeLocation(
+      latitude: fields[0] as double,
+      longitude: fields[1] as double,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, HomeLocation obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.latitude)
+      ..writeByte(1)
+      ..write(obj.longitude);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HomeLocationAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

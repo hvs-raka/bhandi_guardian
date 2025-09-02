@@ -34,6 +34,7 @@ void main() async {
   Hive.registerAdapter(VisitListAdapter());
   Hive.registerAdapter(PlayListAdapter());
   Hive.registerAdapter(GuardianListAdapter());
+  Hive.registerAdapter(HomeLocationAdapter());
 
   await Hive.openBox<Todo_Model>('Todos');
   await Hive.openBox<Visit_List>(
@@ -41,6 +42,7 @@ void main() async {
   ); // here 'Todos' and 'Visit_List' could be anything but should be consistent
   await Hive.openBox<PlayList>('PlayList');
   await Hive.openBox<GuardianList>('GuardianList');
+  await Hive.openBox<HomeLocation>('HomeLocation');
   runApp(const MyApp());
 }
 

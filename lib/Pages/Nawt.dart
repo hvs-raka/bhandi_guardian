@@ -4,6 +4,7 @@ import 'package:bhandi_guardian/utils/debouncer.dart';
 import 'package:bhandi_guardian/boxes/boxes.dart';
 import 'package:bhandi_guardian/db_model/Todo_model.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -285,7 +286,7 @@ class SafeLocation extends StatelessWidget {
             CoordinateCard(),
             SizedBox(height: 20),
             const Text("or", style: TextStyle(fontSize: 20)),
-            CurrentLocationCard(),
+            //CurrentLocationCard(),
           ],
         ),
       ),
@@ -303,6 +304,72 @@ class CoordinateCard extends StatefulWidget {
 class _CoordinateCardState extends State<CoordinateCard> {
   final TextEditingController latController = TextEditingController();
   final TextEditingController longController = TextEditingController();
+  late final Box<HomeLocation> homeBox;
+
+  @override
+  void initState() {
+    super.initState();
+    homeBox = Hive.box<HomeLocation>('HomeLocation');
+
+    if (homeBox.isNotEmpty) {
+      final home = homeBox.getAt(0);
+      latController.text = home?.latitude.toString() ?? '';
+      longController.text = home?.longitude.toString() ?? '';
+    }
+  }
+
+  Future<bool> _handleLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permission denied again
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _getCurrentLocation() async {
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location permissions are denied')),
+      );
+      return;
+    }
+
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    // update fields in THIS parent
+    latController.text = position.latitude.toString();
+    longController.text = position.longitude.toString();
+
+    _saveHomeLocation(); // then save
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Home location saved')));
+  }
+
+  void _saveHomeLocation() {
+    final lat = double.tryParse(latController.text.trim()) ?? 0;
+    final long = double.tryParse(longController.text.trim()) ?? 0;
+    if (lat == 0 || long == 0) return;
+
+    final home = HomeLocation(latitude: lat, longitude: long);
+
+    if (homeBox.isNotEmpty) {
+      homeBox.putAt(0, home); // update the single record
+    } else {
+      homeBox.add(home); // first time
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,6 +402,10 @@ class _CoordinateCardState extends State<CoordinateCard> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // ⬇️ Use the child and PASS the callback
+            CurrentLocationCard(onSave: _getCurrentLocation),
           ],
         ),
       ),
@@ -343,7 +414,8 @@ class _CoordinateCardState extends State<CoordinateCard> {
 }
 
 class CurrentLocationCard extends StatelessWidget {
-  const CurrentLocationCard({super.key});
+  final VoidCallback onSave;
+  const CurrentLocationCard({super.key, required this.onSave});
 
   @override
   Widget build(BuildContext context) {
@@ -360,9 +432,7 @@ class CurrentLocationCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Add location logic
-              },
+              onPressed: onSave,
               icon: const Icon(Icons.location_on),
               label: const Text("Mark My Current Location"),
               style: ElevatedButton.styleFrom(

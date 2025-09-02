@@ -59,3 +59,14 @@ class GuardianList extends HiveObject {
     required this.button,
   });
 }
+
+@HiveType(typeId: 4)
+class HomeLocation extends HiveObject {
+  @HiveField(0)
+  double latitude;
+
+  @HiveField(1)
+  double longitude;
+
+  HomeLocation({required this.latitude, required this.longitude});
+}
