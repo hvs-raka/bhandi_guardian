@@ -70,3 +70,23 @@ class HomeLocation extends HiveObject {
 
   HomeLocation({required this.latitude, required this.longitude});
 }
+
+// SOS Settings
+
+@HiveType(typeId: 5)
+class SosSettingsModel extends HiveObject {
+  @HiveField(0)
+  bool guardianEnabled;
+
+  @HiveField(1)
+  bool homeLocationEnabled;
+
+  @HiveField(2)
+  bool sosMessageEnabled;
+
+  SosSettingsModel({
+    required this.guardianEnabled,
+    required this.homeLocationEnabled,
+    required this.sosMessageEnabled,
+  });
+}

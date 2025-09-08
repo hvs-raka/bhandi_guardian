@@ -96,7 +96,10 @@ class Nawt extends StatelessWidget {
               //icon: Icons.info,
               label: "SOS Settings",
               onTap: () {
-                // Navigate or do something
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SosSettings()),
+                );
               },
             ),
           ],
@@ -816,6 +819,223 @@ class _PlaylistCard extends State<PlaylistCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// SOS Settings
+
+class SosSettings extends StatefulWidget {
+  const SosSettings({super.key});
+
+  @override
+  State<SosSettings> createState() => _SosStateCard();
+}
+
+class _SosStateCard extends State<SosSettings> {
+  late Box<SosSettingsModel> sosBox;
+  late SosSettingsModel settings;
+
+  @override
+  void initState() {
+    super.initState();
+    sosBox = Hive.box<SosSettingsModel>('sosSettings');
+
+    if (sosBox.isEmpty) {
+      settings = SosSettingsModel(
+        guardianEnabled: false,
+        homeLocationEnabled: false,
+        sosMessageEnabled: false,
+      );
+      sosBox.add(settings);
+    } else {
+      settings = sosBox.getAt(0)!;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextEditingController sosMessageController = TextEditingController();
+    return Scaffold(
+      appBar: AppBar(title: const Text("SOS Settings"), centerTitle: true),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text(
+            "Configure SOS Options",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+
+          // Guardian Contacts
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: ListTile(
+              leading: const Icon(Icons.contacts, color: Colors.red),
+              title: const Text("Guardian Contacts"),
+              subtitle: const Text("1st Guardian will be called"),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Switch(
+                    value: settings!.guardianEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        settings!.guardianEnabled = value;
+                        settings!.save(); // Saves to Hive
+                      });
+                    },
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: settings.guardianEnabled ? Colors.blue : Colors.grey,
+                  ),
+                ],
+              ),
+              onTap: () {
+                if (settings.guardianEnabled) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const GuardianSetup()),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Turn it on first...')),
+                  );
+                }
+              },
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Home Location
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: ListTile(
+              leading: const Icon(Icons.home, color: Colors.blue),
+              title: const Text("Home Location"),
+              subtitle: const Text("Set or update your home location"),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Switch(
+                    value: settings!.homeLocationEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        settings!.homeLocationEnabled = value;
+                        settings!.save(); // Saves to Hive
+                      });
+                    },
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color:
+                        settings.homeLocationEnabled
+                            ? Colors.blue
+                            : Colors.grey,
+                  ),
+                ],
+              ),
+              onTap: () {
+                if (settings.homeLocationEnabled) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SafeLocation()),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Turn it on first...')),
+                  );
+                }
+              },
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // SOS Message
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: ListTile(
+              leading: const Icon(Icons.message, color: Colors.green),
+              title: const Text("SOS Message"),
+              subtitle: const Text("Add Enable or disable button"),
+              onTap: () {
+                // TODO: Navigate to sos message settings
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "SOS Contact for SMS",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: sosMessageController,
+                    maxLines: 1, // small text box
+                    decoration: const InputDecoration(
+                      hintText: "Enter mobile number here...",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Your SOS Message",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: sosMessageController,
+                    maxLines: 2, // small text box
+                    decoration: const InputDecoration(
+                      hintText: "Enter your SOS message here...",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

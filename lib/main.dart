@@ -35,6 +35,7 @@ void main() async {
   Hive.registerAdapter(PlayListAdapter());
   Hive.registerAdapter(GuardianListAdapter());
   Hive.registerAdapter(HomeLocationAdapter());
+  Hive.registerAdapter(SosSettingsModelAdapter());
 
   await Hive.openBox<Todo_Model>('Todos');
   await Hive.openBox<Visit_List>(
@@ -43,6 +44,7 @@ void main() async {
   await Hive.openBox<PlayList>('PlayList');
   await Hive.openBox<GuardianList>('GuardianList');
   await Hive.openBox<HomeLocation>('HomeLocation');
+  await Hive.openBox<SosSettingsModel>('sosSettings');
   runApp(const MyApp());
 }
 

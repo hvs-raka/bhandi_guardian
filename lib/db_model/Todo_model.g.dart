@@ -193,3 +193,43 @@ class HomeLocationAdapter extends TypeAdapter<HomeLocation> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class SosSettingsModelAdapter extends TypeAdapter<SosSettingsModel> {
+  @override
+  final int typeId = 5;
+
+  @override
+  SosSettingsModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return SosSettingsModel(
+      guardianEnabled: fields[0] as bool,
+      homeLocationEnabled: fields[1] as bool,
+      sosMessageEnabled: fields[2] as bool,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, SosSettingsModel obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.guardianEnabled)
+      ..writeByte(1)
+      ..write(obj.homeLocationEnabled)
+      ..writeByte(2)
+      ..write(obj.sosMessageEnabled);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SosSettingsModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
