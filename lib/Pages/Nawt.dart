@@ -847,6 +847,8 @@ class _SosStateCard extends State<SosSettings> {
         guardianEnabled: false,
         homeLocationEnabled: false,
         sosMessageEnabled: false,
+        SOSmessage: 'default message here',
+        SOSnumber: 'default number here',
       );
       sosBox.add(settings);
     } else {
@@ -882,11 +884,11 @@ class _SosStateCard extends State<SosSettings> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Switch(
-                    value: settings!.guardianEnabled,
+                    value: settings.guardianEnabled,
                     onChanged: (value) {
                       setState(() {
-                        settings!.guardianEnabled = value;
-                        settings!.save(); // Saves to Hive
+                        settings.guardianEnabled = value;
+                        settings.save(); // Saves to Hive
                       });
                     },
                   ),
@@ -928,11 +930,11 @@ class _SosStateCard extends State<SosSettings> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Switch(
-                    value: settings!.homeLocationEnabled,
+                    value: settings.homeLocationEnabled,
                     onChanged: (value) {
                       setState(() {
-                        settings!.homeLocationEnabled = value;
-                        settings!.save(); // Saves to Hive
+                        settings.homeLocationEnabled = value;
+                        settings.save(); // Saves to Hive
                       });
                     },
                   ),
@@ -972,12 +974,18 @@ class _SosStateCard extends State<SosSettings> {
             child: ListTile(
               leading: const Icon(Icons.message, color: Colors.green),
               title: const Text("SOS Message"),
-              subtitle: const Text("Add Enable or disable button"),
-              onTap: () {
-                // TODO: Navigate to sos message settings
-              },
+              trailing: Switch(
+                value: settings.sosMessageEnabled,
+                onChanged: (bool value) {
+                  setState(() {
+                    settings.sosMessageEnabled = value;
+                    settings.save(); // Saves to Hive
+                  });
+                },
+              ),
             ),
           ),
+
           const SizedBox(height: 12),
 
           Card(

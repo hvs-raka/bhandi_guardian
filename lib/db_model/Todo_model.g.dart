@@ -208,19 +208,25 @@ class SosSettingsModelAdapter extends TypeAdapter<SosSettingsModel> {
       guardianEnabled: fields[0] as bool,
       homeLocationEnabled: fields[1] as bool,
       sosMessageEnabled: fields[2] as bool,
+      SOSnumber: fields[3] as String,
+      SOSmessage: fields[4] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, SosSettingsModel obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.guardianEnabled)
       ..writeByte(1)
       ..write(obj.homeLocationEnabled)
       ..writeByte(2)
-      ..write(obj.sosMessageEnabled);
+      ..write(obj.sosMessageEnabled)
+      ..writeByte(3)
+      ..write(obj.SOSnumber)
+      ..writeByte(4)
+      ..write(obj.SOSmessage);
   }
 
   @override

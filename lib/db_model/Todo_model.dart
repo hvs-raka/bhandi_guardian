@@ -84,9 +84,17 @@ class SosSettingsModel extends HiveObject {
   @HiveField(2)
   bool sosMessageEnabled;
 
+  @HiveField(3)
+  String SOSnumber;
+
+  @HiveField(4)
+  String SOSmessage;
+
   SosSettingsModel({
     required this.guardianEnabled,
     required this.homeLocationEnabled,
     required this.sosMessageEnabled,
+    required this.SOSnumber,
+    required this.SOSmessage,
   });
 }
