@@ -835,30 +835,37 @@ class SosSettings extends StatefulWidget {
 
 class _SosStateCard extends State<SosSettings> {
   late Box<SosSettingsModel> sosBox;
+  late TextEditingController sosNumberController;
+  late TextEditingController sosMessageController;
   late SosSettingsModel settings;
 
   @override
   void initState() {
     super.initState();
+
     sosBox = Hive.box<SosSettingsModel>('sosSettings');
+
+    sosNumberController = TextEditingController();
+    sosMessageController = TextEditingController();
 
     if (sosBox.isEmpty) {
       settings = SosSettingsModel(
         guardianEnabled: false,
         homeLocationEnabled: false,
         sosMessageEnabled: false,
-        SOSmessage: 'default message here',
-        SOSnumber: 'default number here',
+        SOSmessage: '',
+        SOSnumber: '',
       );
       sosBox.add(settings);
     } else {
       settings = sosBox.getAt(0)!;
+      sosNumberController.text = settings.SOSnumber;
+      sosMessageController.text = settings.SOSmessage;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController sosMessageController = TextEditingController();
     return Scaffold(
       appBar: AppBar(title: const Text("SOS Settings"), centerTitle: true),
       body: ListView(
@@ -1004,12 +1011,17 @@ class _SosStateCard extends State<SosSettings> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: sosMessageController,
+                    controller: sosNumberController,
+                    keyboardType: TextInputType.phone,
                     maxLines: 1, // small text box
                     decoration: const InputDecoration(
                       hintText: "Enter mobile number here...",
                       border: OutlineInputBorder(),
                     ),
+                    onChanged: (value) {
+                      settings.SOSnumber = value.trim();
+                      settings.save();
+                    },
                   ),
                 ],
               ),
@@ -1038,10 +1050,18 @@ class _SosStateCard extends State<SosSettings> {
                       hintText: "Enter your SOS message here...",
                       border: OutlineInputBorder(),
                     ),
+                    onChanged: (value) {
+                      settings.SOSmessage = value.trim();
+                      settings.save();
+                    },
                   ),
                 ],
               ),
             ),
+          ),
+          const Text(
+            "SOS settings, message will go via SMS with your current location",
+            style: TextStyle(fontSize: 14),
           ),
         ],
       ),
