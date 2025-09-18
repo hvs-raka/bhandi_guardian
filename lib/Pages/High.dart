@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:url_launcher/url_launcher.dart'; // For calling functionality
 import 'package:geolocator/geolocator.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class High extends StatelessWidget {
   const High({super.key});
@@ -80,7 +81,10 @@ class High extends StatelessWidget {
               //icon: Icons.info,
               label: "Playlist",
               onTap: () {
-                // action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PlaylistWidget()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -89,7 +93,12 @@ class High extends StatelessWidget {
               //icon: Icons.info,
               label: "Locations to visit",
               onTap: () {
-                // action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const VisitLocationsWidget(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -98,7 +107,10 @@ class High extends StatelessWidget {
               //icon: Icons.info,
               label: "Having BT?",
               onTap: () {
-                // action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HarmReductionTips()),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -293,5 +305,285 @@ Future<void> getHomeFunction(BuildContext context) async {
     ).showSnackBar(const SnackBar(content: Text('Failed to open navigation')));
   } finally {
     Navigator.pop(context); // Ensure loading closes
+  }
+}
+
+// Playlist
+
+class PlaylistWidget extends StatelessWidget {
+  const PlaylistWidget({super.key});
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception("Could not launch $url");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final playlistBox = Hive.box<PlayList>('PlayList');
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("🎶 Playlists"), centerTitle: true),
+      body: ValueListenableBuilder(
+        valueListenable: playlistBox.listenable(),
+        builder: (context, Box<PlayList> box, _) {
+          if (box.isEmpty) {
+            return const Center(
+              child: Text(
+                "No playlists saved.",
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
+          }
+
+          final playlists = box.values.toList();
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: playlists.length,
+            itemBuilder: (context, index) {
+              final playlist = playlists[index];
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  title: Text(
+                    playlist.playlistName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  trailing: ElevatedButton.icon(
+                    onPressed: () => _launchUrl(playlist.playlistLink),
+                    icon: const Icon(Icons.play_arrow, color: Colors.white),
+                    label: const Text("Play"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Visit Location
+
+class VisitLocationsWidget extends StatelessWidget {
+  const VisitLocationsWidget({super.key});
+
+  Future<void> _navigateToLocation(double lat, double lng) async {
+    final Uri googleMapsUrl = Uri.parse(
+      "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+    );
+
+    if (!await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication)) {
+      debugPrint("Could not launch Google Maps");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visitBox = Hive.box<Visit_List>('Visit_List');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("📍 Visit Locations"),
+        centerTitle: true,
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: visitBox.listenable(),
+        builder: (context, Box<Visit_List> box, _) {
+          if (box.isEmpty) {
+            return const Center(
+              child: Text(
+                "No visit locations saved.",
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
+          }
+
+          final visits = box.values.toList().take(2).toList(); // take only 2
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: visits.length,
+            itemBuilder: (context, index) {
+              final location = visits[index];
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  title: Text(
+                    location.placeName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  trailing: ElevatedButton.icon(
+                    onPressed:
+                        () => _navigateToLocation(
+                          location.latitude,
+                          location.longitude,
+                        ),
+                    icon: const Icon(Icons.navigation, color: Colors.white),
+                    label: const Text("Navigate"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Having BT widget
+
+class HarmReductionTips extends StatelessWidget {
+  const HarmReductionTips({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Harm Reduction Tips"),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSection(
+            title: "🌿 Too High on Weed (Bad Trip / BT)",
+            tips: [
+              "Stay calm & safe → Reassure, quiet environment.",
+              "Hydrate → Small sips of water or electrolyte drink.",
+              "Sugar helps → Sweet drink (juice, soda) can reduce intensity.",
+              "Black pepper → Smelling or chewing a few black peppercorns may ease anxiety.",
+              "Fresh air → Cool, ventilated space.",
+              "Rest → Lie down, close eyes, slow breathing.",
+              "Take a shower or wash your face → Helps reset body & mind.",
+            ],
+            color: Colors.green[100]!,
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            title: "🍺 Too Drunk (Alcohol Overdose Signs)",
+            tips: [
+              "Stop drinking immediately.",
+              "Hydrate → Water or electrolyte drink (avoid coffee).",
+              "Food → Light snack to slow absorption.",
+              "Do NOT make them vomit if very drunk (risk of choking).",
+              "Lay on their side if unconscious → recovery position.",
+              "Seek emergency help if: vomiting nonstop, slow breathing, unconscious, or skin turns blue/pale.",
+            ],
+            color: Colors.red[100]!,
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            title: "🚬 Nicotine (Too Much Smoking/Vaping)",
+            tips: [
+              "Sit or lie down, sip water, and take deep breaths.",
+              "Chew gum or eat something light.",
+              "Fresh air helps dizziness/nausea.",
+              "Rest until the symptoms fade.",
+            ],
+            color: Colors.blue[100]!,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required List<String> tips,
+    required Color color,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...tips.map(
+              (tip) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "• ",
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                    Expanded(
+                      child: Text(
+                        tip,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
