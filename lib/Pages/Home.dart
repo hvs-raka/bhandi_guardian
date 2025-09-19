@@ -13,7 +13,7 @@ class Home extends StatelessWidget {
     // Scaffold is the basic Material Design layout structure
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bhandi Guardian'),
+        title: const Text('High! Help?'),
         backgroundColor:
             Theme.of(context)
                 .colorScheme
@@ -60,7 +60,7 @@ class Home extends StatelessWidget {
                     style: TextStyle(fontSize: 16),
                   ),
                   TextSpan(
-                    text: 'me ^-^',
+                    text: 'Raka',
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),

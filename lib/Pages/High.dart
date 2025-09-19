@@ -31,8 +31,22 @@ class High extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Add your SOS logic here
-              print("SOS pressed!");
+              showDialog(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text("SOS"),
+                      content: const Text(
+                        "Chill Mann nothing can go wrong when you're High, Just Follow the Light",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red, // Red background
@@ -587,3 +601,6 @@ class HarmReductionTips extends StatelessWidget {
     );
   }
 }
+
+// SOS Settings
+// pending

@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
     // MaterialApp is considered as root widget of the app
     return MaterialApp.router(
       title:
-          'Bhandi Guardian', // title it usually appears in task switches on mobile devices
+          'High! Help?', // title it usually appears in task switches on mobile devices
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.teal,
