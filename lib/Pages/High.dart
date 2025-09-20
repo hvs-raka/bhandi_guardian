@@ -49,7 +49,12 @@ class High extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red, // Red background
+              backgroundColor: const Color.fromARGB(
+                255,
+                52,
+                162,
+                235,
+              ), // Red background
               shape: const CircleBorder(), // Makes it round
               padding: const EdgeInsets.all(14), // Controls size
             ),
